@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { margin: 0; padding: 0; font-family: system-ui, sans-serif; overflow: hidden; }
+        .risk-deck-container {
+            max-height: 720px;
+            overflow-y: auto;
+            padding-right: 4px;
+            padding-bottom: 20px;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #b0bec5; border-radius: 3px; }
+        
+        .title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #37474f;
+            font-size: 1rem;
+        }
+        .subtitle {
+            font-size: 0.8rem;
+            color: #78909c;
+            margin: 0 0 10px 0;
+        }
+    </style>
+    <script>
+        let isRendered = false;
+
+        function sendMessageToStreamlit(type, data) {
+            window.parent.postMessage({ isStreamlitMessage: true, type: type, ...data }, "*");
+        }
+
+        function setHeight() {
+            sendMessageToStreamlit("streamlit:setFrameHeight", { height: 750 });
+        }
+
+        window.addEventListener("message", function(event) {
+            if (event.data.type === "streamlit:render") {
+                const args = event.data.args;
+                
+                if (args.cards_html) {
+                    document.getElementById("cards-wrapper").innerHTML = args.cards_html;
+                }
+
+                // Bind click events to .pick-btn
+                document.querySelectorAll('.pick-btn').forEach(function(btn){
+                    btn.onclick = function() {
+                        const idx = btn.getAttribute('data-idx');
+                        sendMessageToStreamlit("streamlit:setComponentValue", { value: {idx: idx, ts: Date.now(), action: "focus"} });
+                    };
+                });
+                
+                // Bind click events to .apply-btn
+                document.querySelectorAll('.apply-btn').forEach(function(btn){
+                    btn.onclick = function() {
+                        const idx = btn.getAttribute('data-idx');
+                        sendMessageToStreamlit("streamlit:setComponentValue", { value: {idx: idx, ts: Date.now(), action: "apply"} });
+                    };
+                });
+
+                if (!isRendered) {
+                    isRendered = true;
+                    setTimeout(setHeight, 100);
+                }
+            }
+        });
+        
+        window.addEventListener("load", function() {
+            sendMessageToStreamlit("streamlit:componentReady", {apiVersion: 1});
+        });
+    </script>
+</head>
+<body>
+    <div id="container" class="risk-deck-container">
+        <div class="title">问题与修改建议</div>
+        <p class="subtitle">拖动卡片到右侧「追问 AI」区域，或点击卡片上的「选为追问对象」。</p>
+        <div id="cards-wrapper"></div>
+    </div>
+</body>
+</html>

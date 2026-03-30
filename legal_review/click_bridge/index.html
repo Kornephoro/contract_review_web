@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script>
+        // Minimal Streamlit Component Protocol
+        let isRendered = false;
+
+        function sendMessageToStreamlit(type, data) {
+            window.parent.postMessage(
+                {
+                    isStreamlitMessage: true,
+                    type: type,
+                    ...data,
+                },
+                "*"
+            );
+        }
+
+        window.addEventListener("message", function(event) {
+            if (event.data.type === "streamlit:render") {
+                if (!isRendered) {
+                    isRendered = true;
+                    // Inform Streamlit to set frame height to 0 (invisible)
+                    sendMessageToStreamlit("setFrameHeight", { height: 0 });
+                }
+            }
+        });
+
+        // Listen for the custom event from the parent window's JS
+        window.parent.document.addEventListener("LegalReviewSetFocus", function(e) {
+            sendMessageToStreamlit("setComponentValue", { value: {idx: e.detail.idx, ts: Date.now()} });
+        });
+    </script>
+</head>
+<body></body>
+</html>

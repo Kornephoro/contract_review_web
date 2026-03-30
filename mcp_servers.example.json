@@ -1,0 +1,11 @@
+{
+  "enabled": true,
+  "servers": [
+    {
+      "name": "legal_demo",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-everything"],
+      "env": {}
+    }
+  ]
+}

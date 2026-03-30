@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; padding: 0; font-family: system-ui, sans-serif; overflow: hidden; }
+
+        /* ── 大型拖放区 ── */
+        .dropzone-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #78909c;
+            border: 2px dashed #b0bec5;
+            border-radius: 12px;
+            background: rgba(236, 239, 241, 0.4);
+            margin-top: 4px;
+            width: 100%;
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+        }
+        .dropzone-box.drag-active {
+            border-color: #1e88e5 !important;
+            background: rgba(30, 136, 229, 0.10) !important;
+            transform: scale(1.01);
+        }
+        .dropzone-box.drag-active * { pointer-events: none; }
+        #icon { font-size: 2rem; margin-bottom: 8px; }
+        #title { font-size: 1.05rem; font-weight: 500; }
+        #subtitle { font-size: 0.85rem; margin-top: 6px; color: #90a4ae; }
+
+        /* ── Mini 拖放条 ── */
+        .mini-drop {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            border: 1.5px dashed #b0bec5;
+            border-radius: 8px;
+            background: rgba(236, 239, 241, 0.35);
+            color: #78909c;
+            font-size: 0.82rem;
+            cursor: pointer;
+            transition: all 0.18s ease;
+            width: 100%;
+            margin-top: 2px;
+        }
+        .mini-drop.drag-active {
+            border-color: #1e88e5 !important;
+            background: rgba(30, 136, 229, 0.08) !important;
+            color: #1e88e5;
+        }
+        .mini-drop .mini-icon { font-size: 1rem; flex-shrink: 0; }
+        .mini-drop .mini-text { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    </style>
+    <script>
+        let isRendered = false;
+        let isMini = false;
+
+        function sendMessageToStreamlit(type, data) {
+            window.parent.postMessage({ isStreamlitMessage: true, type: type, ...data }, "*");
+        }
+
+        function handleDrop(e, el) {
+            e.preventDefault();
+            el.classList.remove("drag-active");
+            let idx = e.dataTransfer.getData("text/plain");
+            if (idx !== undefined && idx !== "") {
+                sendMessageToStreamlit("streamlit:setComponentValue", { value: { idx: idx, ts: Date.now() } });
+            }
+        }
+
+        function bindDragEvents(el) {
+            el.ondragover = e => {
+                e.preventDefault();
+                el.classList.add("drag-active");
+                e.dataTransfer.dropEffect = "copy";
+            };
+            el.ondragleave = e => {
+                el.classList.remove("drag-active");
+            };
+            el.ondrop = e => handleDrop(e, el);
+        }
+
+        window.addEventListener("message", function(event) {
+            if (event.data.type === "streamlit:render") {
+                const args = event.data.args;
+                const minH = args.min_height || 200;
+                isMini = minH <= 60;
+
+                if (isMini) {
+                    // 渲染 mini 条
+                    document.getElementById("large-zone").style.display = "none";
+                    const mini = document.getElementById("mini-zone");
+                    mini.style.display = "flex";
+                    if (args.title) {
+                        document.getElementById("mini-text").innerText = args.title;
+                    }
+                    if (!isRendered) {
+                        bindDragEvents(mini);
+                    }
+                } else {
+                    // 渲染大型拖放区
+                    document.getElementById("mini-zone").style.display = "none";
+                    const box = document.getElementById("dropzone");
+                    box.style.display = "flex";
+                    box.style.minHeight = minH + "px";
+                    if (args.title) document.getElementById("title").innerText = args.title;
+                    if (args.subtitle) {
+                        document.getElementById("subtitle").innerText = args.subtitle;
+                        document.getElementById("subtitle").style.display = "";
+                    } else {
+                        document.getElementById("subtitle").style.display = "none";
+                    }
+                    if (!isRendered) {
+                        bindDragEvents(box);
+                    }
+                }
+
+                if (!isRendered) {
+                    isRendered = true;
+                    setTimeout(() => {
+                        sendMessageToStreamlit("streamlit:setFrameHeight", { height: document.body.scrollHeight + 8 });
+                    }, 60);
+                }
+            }
+        });
+
+        window.addEventListener("load", function() {
+            sendMessageToStreamlit("streamlit:componentReady", { apiVersion: 1 });
+        });
+    </script>
+</head>
+<body>
+    <!-- 大型拖放区 -->
+    <div id="large-zone">
+        <div id="dropzone" class="dropzone-box" style="display:none;">
+            <div id="icon">📥</div>
+            <div id="title">将左侧卡片拖拽至此</div>
+            <div id="subtitle">或点击卡片上的「选为追问对象」</div>
+        </div>
+    </div>
+
+    <!-- Mini 拖放条 -->
+    <div id="mini-zone" class="mini-drop" style="display:none;">
+        <span class="mini-icon">🔄</span>
+        <span id="mini-text" class="mini-text">拖入新卡片可替换追问对象</span>
+    </div>
+</body>
+</html>

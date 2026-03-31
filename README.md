@@ -1,60 +1,142 @@
-# 智审法务 - 交互式 AI 合同审查与编辑平台 (Interactive AI Legal Review Agent)
+# 智审法务 - 交互式 AI 合同审查平台
 
-这是一个由大语言模型（LLM）驱动的专业级智能合同审查平台。与传统的“单向输出”审查工具不同，它集成了**多层级容忍式模糊匹配算法**和**原生文档结构渲染技术**，能够实现从审查、编辑到格式无损导出的一站式交互式法务工作流。
+这是一个基于 Streamlit 的本地合同审查工具，支持：
 
-## 🌟 核心功能
+- 合同正文审查与风险定位
+- 审校模板库与自定义模板管理
+- 扫描版 PDF / 图片 OCR
+- 风险卡片、追问对话、修订建议应用
+- DOCX 保格式导出
 
-1. **智能审查与精准定位**
-   - 上传或输入合同正文，AI 将全自动从“合规”、“履约”等多个专业法务维度剖析风险点。
-   - 提取的每一条修改建议都会精准**挂载定位**到合同原文的确切段落，并在左侧悬浮高亮（红黄风险预警）。
+## 核心说明
 
-2. **交互式全息改稿体验**
-   - **单点交互**：无需复制粘贴，直接在风险卡片上点击“应用修改”，左侧原文片段即可打上绿色补丁，划去原内容并在线渲染修改后的法言法语。
-   - **一键全修**：点击“一键应用所有推荐”，自动采纳所有建议并瞬间更新全局文档预览。
-   - **随时撤销**：每一条应用后也可随时点击撤销，原文安全恢复如初。
+- 项目要求使用 **Python 3.11 及以上**
+- OCR 依赖为必选项，首次使用前请先初始化本地模型
+- 扫描件 OCR 默认使用 **PaddleOCR 3.x + PP-OCRv5 mobile**
+- 文本型 PDF 仍优先使用原生文本提取，不会强制走 OCR
 
-3. **对话式追问与 MCP 服务集成**
-   - **动态拖拽追问**：看到不合适的审查建议？将风险卡片拖拽到右侧对话框，或者一键选为“追问对象”，即可直接同模型就该法条细节进行持续沟通。
-   - **MCP 增强支持**：系统内化支持 MCP（模型上下文协议）检索服务。开启后，可赋予大模型查询判例数据库、检索外挂法典的能力。
+## 环境要求
 
-4. **无损原格式底层导出 (Native DOCX Exporter)**
-   - 我们内置了完全独立于页面文本的 `python-docx` 导出引擎。
-   - 当您上传 `.docx` 合同并在页面上完成打补丁修改后，点击“导出修改版”，系统会直接解包您的原始 Word 文件，使用容错算法在后台将修改内容无缝替换到对应段落（包括表格里的文字）。
-   - **核心优势**：字体、排版、表格布局、多级列表**百分之百**保留，下载即可直接进入签批流程。
+- Windows
+- Python 3.11+
 
-## 🔧 快速部署与使用指南
+建议始终在同一个虚拟环境里执行以下命令：
 
-### 1. 环境准备
-确保您的计算机上已安装 Python 3.9+。
-```bash
-git clone https://github.com/Kornephoro/contract_review_web.git
-cd contract_review_web
-pip install -r requirements.txt
+```powershell
+python -m pip install -r requirements.txt
+python scripts/init_ocr.py
+python -m streamlit run app.py
 ```
 
-### 2. 启动服务
-在项目根目录运行以下命令开启 Streamlit 本地服务：
-```bash
-streamlit run app.py
+## 安装与启动
+
+### 1. 安装依赖
+
+```powershell
+python -m pip install -r requirements.txt
 ```
-终端将输出访问地址（通常为 `http://localhost:8501`）。在浏览器打开即可进入平台。
 
-### 3. API 供应商配置
-系统提供对三大 AI 后端的全自动适配缓存。您的配置仅保存在本地，**绝不上传云端**，保护 API Key 隐私：
-- **Anthropic系列**: 填入 API Key 后指定 Claude-3.5-Sonnet 等。
-- **OpenAI 兼容协议 (如 DeepSeek)**: 指定 Base URL 与模型名称及 Key 快速接入国产大模型方案。
-- **Ollama 本地私有化**: 填入局域网的 Ollama 离线地址（如 `http://localhost:11434/v1`）并调用本地模型进行纯内网机密审查。
+`requirements.txt` 已包含：
 
-## 🛡️ 数据安全与隐私说明
-*(面向开发与使用者)*
-1. **API Keys 不会被 Git 追踪**：项目中生成的配置缓存 (`api_settings.json`) 已在此代码库的 `.gitignore` 中配置拦截，不会泄露给 GitHub。您的密钥只存储在您的本地电脑中。其它克隆该项目的用户在使用时会在他们各自的电脑上生成空白的配置文件。
-2. **纯本地流转**：除非您对接了闭源云端大模型 API，本平台自身的业务逻辑处理（匹配、排版解析、导出操作）绝对在您本地主机内存流转操作，未内置任何上报/收集机制。
+- `paddlepaddle`
+- `paddleocr==3.3.2`
+- `streamlit`
+- `openai`
 
-## 📁 核心项目结构
-- `app.py`: 系统主控入口与 Streamlit 渲染循环。
-- `legal_review/`: 核心审查引擎逻辑组件。
-  - `llm_client.py`: 提供各大模型服务商通用抽象。
-  - `document_editor.py`: **无损格式重构**核心算法引擎。
-  - `text_matcher.py`: 解决 AI 修改文本“幻觉”以及标点差错导致挂载失败的 **四层级容忍式模糊匹配引擎**。
-  - `review_html.py`: 处理从文本转化为高亮实时动态渲染交互面板。
-  - `components/`: 包含可拖拽风险卡片的 JS 原生流组件。
+### 2. 初始化 OCR
+
+```powershell
+python scripts/init_ocr.py
+```
+
+这个脚本会：
+
+- 检查当前解释器是否为 Python 3.11+
+- 预下载并预热本地 OCR 模型
+- 避免用户第一次点击“开始审查”时现场下载模型
+
+默认模型缓存目录：
+
+```text
+C:\Users\<你的用户名>\.paddlex\official_models
+```
+
+### 3. 启动应用
+
+```powershell
+python -m streamlit run app.py
+```
+
+默认访问地址通常是：
+
+- `http://localhost:8501`
+
+## OCR 机制
+
+当前 OCR 行为如下：
+
+- `.docx`：使用 `python-docx`
+- 文本型 `.pdf`：优先使用 `PyPDF2`
+- 扫描型 `.pdf`：自动切换到 PaddleOCR
+- `.png/.jpg/.jpeg`：直接使用 PaddleOCR
+
+应用运行时不会再偷偷下载模型。
+
+如果 OCR 尚未初始化，页面会直接提示先执行：
+
+```powershell
+python scripts/init_ocr.py
+```
+
+## API 配置
+
+侧边栏支持以下模型来源：
+
+- Anthropic
+- OpenAI 兼容接口
+- Ollama 本地模型
+
+注意：
+
+- “OpenAI” 这一栏实际是 **OpenAI 兼容接口**
+- 如果你填的是 OpenAI 官方 Key，`API Base URL` 应改为：
+
+```text
+https://api.openai.com/v1
+```
+
+- 如果你使用 DeepSeek，则可继续使用对应的兼容地址
+
+## 项目结构
+
+- `app.py`：主入口与 Streamlit 页面
+- `legal_review/ocr.py`：OCR 检查、初始化、加载与调用
+- `legal_review/templates.py`：审校模板库
+- `legal_review/prompts.py`：审查提示词构造
+- `legal_review/review_html.py`：风险高亮与审查展示
+- `scripts/init_ocr.py`：OCR 初始化脚本
+
+## 常见问题
+
+### 1. 点击“开始审查”没反应
+
+优先排查这几项：
+
+- 是否用了同一个虚拟环境里的 `python` 启动 Streamlit
+- 是否已经执行过 `python scripts/init_ocr.py`
+- 是否填写了正确的 `API Base URL`
+- 是否先用“直接粘贴合同文本”测试过 AI 调用链路
+
+### 2. 为什么第一次 OCR 很慢
+
+如果还没初始化 OCR，首次运行 `scripts/init_ocr.py` 需要下载并预热模型。这是一次性成本，之后会明显更快。
+
+### 3. 为什么 `python scripts/init_ocr.py` 和页面表现不一致
+
+通常是因为机器上有多个 Python 环境。直接在同一个虚拟环境里使用以下命令即可避免混乱：
+
+```powershell
+python -m pip install -r requirements.txt
+python scripts/init_ocr.py
+python -m streamlit run app.py
+```

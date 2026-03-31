@@ -2,28 +2,41 @@
 <html>
 <head>
     <style>
-        body { margin: 0; padding: 0; font-family: system-ui, sans-serif; overflow: hidden; }
+        body { margin: 0; padding: 0; font-family: "Outfit", "Noto Sans SC", sans-serif; overflow: hidden; background: transparent; }
         .risk-deck-container {
-            max-height: 720px;
+            max-height: 860px;
             overflow-y: auto;
-            padding-right: 4px;
-            padding-bottom: 20px;
+            padding-right: 6px;
+            padding-bottom: 24px;
+            background: transparent;
         }
         /* Custom scrollbar */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #b0bec5; border-radius: 3px; }
-        
+        ::-webkit-scrollbar-thumb { background: #d4cfc7; border-radius: 3px; }
+
         .title {
-            font-weight: 600;
-            margin-bottom: 10px;
-            color: #37474f;
-            font-size: 1rem;
+            font-family: "Cormorant Garamond", "Noto Serif SC", serif;
+            font-weight: 700;
+            margin-bottom: 6px;
+            color: #1a1f2e;
+            font-size: 1.12rem;
+            letter-spacing: 0.01em;
         }
         .subtitle {
-            font-size: 0.8rem;
-            color: #78909c;
-            margin: 0 0 10px 0;
+            font-size: 0.79rem;
+            color: #8a857f;
+            margin: 0 0 12px 0;
+            line-height: 1.6;
+        }
+        .risk-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 14px 30px rgba(26, 31, 46, 0.08) !important;
+        }
+        .apply-btn:hover,
+        .pick-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 18px rgba(26, 31, 46, 0.08);
         }
     </style>
     <script>
@@ -34,7 +47,8 @@
         }
 
         function setHeight() {
-            sendMessageToStreamlit("streamlit:setFrameHeight", { height: 750 });
+            const height = Math.max(820, document.body.scrollHeight + 12);
+            sendMessageToStreamlit("streamlit:setFrameHeight", { height: height });
         }
 
         window.addEventListener("message", function(event) {

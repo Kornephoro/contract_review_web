@@ -32,12 +32,15 @@ def render_clause_centric_view(risks: List[Dict], theme_key: str):
         
     for i, r in enumerate(risks):
         orig = r.get("original", "")
-        sugg = r.get("suggestion", "")
+        sugg = r.get("suggestion_display") or r.get("suggestion", "")
+        sugg_warning = r.get("suggestion_warning", "")
         if not sugg or not orig:
             continue
             
         st.markdown(f"**原文 {i+1}：** {html.escape(orig[:60])}..." if len(orig) > 60 else f"**原文 {i+1}：** {orig}")
         st.markdown(f"> **修改建议：** {sugg}")
+        if sugg_warning:
+            st.caption(f"应用状态：{sugg_warning}")
         st.divider()
 
 def render_party_centric_view(overview: Dict, risks: List[Dict], theme_key: str):

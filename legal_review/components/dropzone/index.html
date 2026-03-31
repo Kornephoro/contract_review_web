@@ -3,7 +3,7 @@
 <head>
     <style>
         * { box-sizing: border-box; }
-        body { margin: 0; padding: 0; font-family: system-ui, sans-serif; overflow: hidden; }
+        body { margin: 0; padding: 0; font-family: "Outfit", "Noto Sans SC", sans-serif; overflow: hidden; }
 
         /* ── 大型拖放区 ── */
         .dropzone-box {
@@ -11,47 +11,52 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            color: #78909c;
-            border: 2px dashed #b0bec5;
-            border-radius: 12px;
-            background: rgba(236, 239, 241, 0.4);
+            color: #8a857f;
+            border: 2px dashed #d4cfc7;
+            border-radius: 18px;
+            background: linear-gradient(180deg, #fffdf9 0%, #f7f1e7 100%);
             margin-top: 4px;
             width: 100%;
+            box-shadow: 0 14px 28px rgba(26, 31, 46, 0.06);
             transition: all 0.2s ease-in-out;
             cursor: pointer;
         }
         .dropzone-box.drag-active {
-            border-color: #1e88e5 !important;
-            background: rgba(30, 136, 229, 0.10) !important;
+            border-color: #b8945f !important;
+            background: linear-gradient(180deg, rgba(255, 251, 242, 0.98) 0%, rgba(245, 234, 211, 0.96) 100%) !important;
             transform: scale(1.01);
         }
         .dropzone-box.drag-active * { pointer-events: none; }
-        #icon { font-size: 2rem; margin-bottom: 8px; }
-        #title { font-size: 1.05rem; font-weight: 500; }
-        #subtitle { font-size: 0.85rem; margin-top: 6px; color: #90a4ae; }
+        #icon { font-size: 1.6rem; margin-bottom: 8px; color: #b8945f; opacity: 0.85; }
+        #title { font-size: 0.95rem; font-weight: 600; color: #1a1f2e; }
+        #subtitle { font-size: 0.82rem; margin-top: 6px; color: #8a857f; }
 
         /* ── Mini 拖放条 ── */
         .mini-drop {
             display: flex;
             align-items: center;
             gap: 8px;
-            padding: 6px 12px;
-            border: 1.5px dashed #b0bec5;
-            border-radius: 8px;
-            background: rgba(236, 239, 241, 0.35);
-            color: #78909c;
+            padding: 8px 12px;
+            border: 1.5px dashed #d4cfc7;
+            border-radius: 12px;
+            background: rgba(255, 252, 247, 0.78);
+            color: #8a857f;
             font-size: 0.82rem;
             cursor: pointer;
+            box-shadow: 0 10px 24px rgba(26, 31, 46, 0.04);
             transition: all 0.18s ease;
             width: 100%;
             margin-top: 2px;
         }
         .mini-drop.drag-active {
-            border-color: #1e88e5 !important;
-            background: rgba(30, 136, 229, 0.08) !important;
-            color: #1e88e5;
+            border-color: #b8945f !important;
+            background: rgba(184, 148, 95, 0.08) !important;
+            color: #b8945f;
         }
-        .mini-drop .mini-icon { font-size: 1rem; flex-shrink: 0; }
+        .mini-drop:hover {
+            border-color: #b8945f;
+        }
+        .mini-drop .mini-icon { font-size: 1rem; flex-shrink: 0; color: #b8945f; opacity: 0.85; }
         .mini-drop .mini-text { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     </style>
     <script>
